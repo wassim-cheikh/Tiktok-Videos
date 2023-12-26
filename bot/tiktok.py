@@ -1,8 +1,5 @@
 from bot.Constants import *
 import requests, datetime, hashlib, hmac, random, zlib, json
-proxies = {
-	"http": "http://Dani420pro:oYPCYAPSQM@185.13.225.125:59100/"
-}
 
 def sign(key, msg):
 	return hmac.new(key, msg.encode('utf-8'), hashlib.sha256).digest()
@@ -64,18 +61,18 @@ def uploadVideo(session_id, video, title, tags, schedule_time=0, verbose=True):
 	session.cookies.set("sessionid", session_id, domain=".tiktok.com")
 
 	url = "https://www.tiktok.com/upload/"
-	r = session.get(url,proxies=proxies)
+	r = session.get(url  )
 	if not assertSuccess(url, r):
 		return False
 
 	url = "https://www.tiktok.com/passport/web/account/info/"
-	r = session.get(url,proxies=proxies)
+	r = session.get(url  )
 	if not assertSuccess(url, r):
 		return False
 	user_id = r.json()["data"]["user_id_str"]
 
 	url = "https://www.tiktok.com/api/v1/video/upload/auth/"
-	r = session.get(url,proxies=proxies)
+	r = session.get(url  )
 	assertSuccess(url, r)
 	access_key = r.json()["video_token_v5"]["access_key_id"]
 	secret_key = r.json()["video_token_v5"]["secret_acess_key"]
@@ -97,7 +94,7 @@ def uploadVideo(session_id, video, title, tags, schedule_time=0, verbose=True):
 	signature = AWSsignature(access_key, secret_key, request_parameters, headers)
 	authorization = f"AWS4-HMAC-SHA256 Credential={access_key}/{datestamp}/us-east-1/vod/aws4_request, SignedHeaders=x-amz-date;x-amz-security-token, Signature={signature}"
 	headers["authorization"] = authorization
-	r = session.get(f"{url}?{request_parameters}", headers=headers,proxies=proxies)
+	r = session.get(f"{url}?{request_parameters}", headers=headers  )
 	if not assertSuccess(url, r):
 		return False
 	upload_node = r.json()["Result"]["InnerUploadAddress"]["UploadNodes"][0]
@@ -115,7 +112,7 @@ def uploadVideo(session_id, video, title, tags, schedule_time=0, verbose=True):
 		"Content-Type": f"multipart/form-data; boundary=---------------------------{rand}"
 	}
 	data = f"-----------------------------{rand}--"
-	r = session.post(url, headers=headers, data=data,proxies=proxies)
+	r = session.post(url, headers=headers, data=data  )
 	if not assertSuccess(url, r):
 		return False
 	upload_id = r.json()["payload"]["uploadID"]
@@ -141,7 +138,7 @@ def uploadVideo(session_id, video, title, tags, schedule_time=0, verbose=True):
 			"Content-Disposition": 'attachment; filename="undefined"',
 			"Content-Crc32": crc
 		}
-		r = session.post(url, headers=headers, data=chunk,proxies=proxies)
+		r = session.post(url, headers=headers, data=chunk  )
 		if not assertSuccess(url, r):
 			return False
 
@@ -151,7 +148,7 @@ def uploadVideo(session_id, video, title, tags, schedule_time=0, verbose=True):
 		"Content-Type": "text/plain;charset=UTF-8",
 	}
 	data = ','.join([f"{i+1}:{crcs[i]}" for i in range(len(crcs))])
-	r = requests.post(url, headers=headers, data=data,proxies=proxies)
+	r = requests.post(url, headers=headers, data=data  )
 	if not assertSuccess(url, r):
 		return False
 
@@ -171,7 +168,7 @@ def uploadVideo(session_id, video, title, tags, schedule_time=0, verbose=True):
 	authorization = f"AWS4-HMAC-SHA256 Credential={access_key}/{datestamp}/us-east-1/vod/aws4_request, SignedHeaders=x-amz-content-sha256;x-amz-date;x-amz-security-token, Signature={signature}"
 	headers["authorization"] = authorization
 	headers["Content-Type"] = "text/plain;charset=UTF-8"
-	r = session.post(f"{url}?{request_parameters}", headers=headers, data=data,proxies=proxies)
+	r = session.post(f"{url}?{request_parameters}", headers=headers, data=data  )
 	if not assertSuccess(url, r):
 		return False
 
@@ -180,7 +177,7 @@ def uploadVideo(session_id, video, title, tags, schedule_time=0, verbose=True):
 	for tag in tags:
 		url = "https://www.tiktok.com/api/upload/challenge/sug/"
 		params = {"keyword":tag}
-		r = session.get(url, params=params,proxies=proxies)
+		r = session.get(url, params=params  )
 		if not assertSuccess(url, r):
 			return False
 		try:
@@ -195,7 +192,7 @@ def uploadVideo(session_id, video, title, tags, schedule_time=0, verbose=True):
 		"X-Secsdk-Csrf-Request":"1",
 		"X-Secsdk-Csrf-Version":"1.2.8"
 	}
-	r = session.head(url, headers=headers,proxies=proxies)
+	r = session.head(url, headers=headers  )
 	if not assertSuccess(url, r):
 		return False
 	#x_csrf_token = r.headers["X-Ware-Csrf-Token"].split(',')[1]
@@ -215,7 +212,7 @@ def uploadVideo(session_id, video, title, tags, schedule_time=0, verbose=True):
 	if schedule_time:
 		params["schedule_time"] = schedule_time
 	#headers = {"X-Secsdk-Csrf-Token": x_csrf_token}
-	r = session.post(url, params=params, headers=headers,proxies=proxies)
+	r = session.post(url, params=params, headers=headers  )
 	if not assertSuccess(url, r):
 		return False
 	if r.json()["status_code"] == 0:
